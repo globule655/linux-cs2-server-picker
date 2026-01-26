@@ -120,8 +120,8 @@ measure_single_latency() {
     local ping_result=$(ping -c 3 -W 2 "$ip" 2>/dev/null | grep 'avg' | awk -F'/' '{print $5}')
     
     if [[ -n "$ping_result" ]]; then
-        # Round to nearest integer
-        printf "%.0f" "$ping_result"
+        # Round to nearest integer (LC_NUMERIC=C ensures '.' is recognized as decimal separator)
+        LC_NUMERIC=C printf "%.0f" "$ping_result"
     else
         echo "999"  # Return high value for unreachable servers
     fi
