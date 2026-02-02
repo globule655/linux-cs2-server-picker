@@ -17,7 +17,7 @@ LATENCY_CACHE_FILE="/tmp/cs2_latencies.cache"
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-ORANGE='\033[0;33m'
+ORANGE='\033[38;5;208m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
@@ -133,9 +133,11 @@ get_latency_color() {
     
     if [[ "$latency" == "N/A" ]] || [[ "$latency" -ge 999 ]]; then
         echo "$RED"
-    elif [[ "$latency" -le 22 ]]; then
+    elif [[ "$latency" -le 24 ]]; then
         echo "$GREEN"
-    elif [[ "$latency" -le 35 ]]; then
+    elif [[ "$latency" -le 60 ]]; then
+        echo "$YELLOW"
+    elif [[ "$latency" -le 99 ]]; then
         echo "$ORANGE"
     else
         echo "$RED"
@@ -309,10 +311,10 @@ apply_rules() {
         fi
     done
     
-    # Find IPs to block (in new but not in current)
+    # Find IPs to block (not currently in iptables)
     local -a to_block=()
     for ip in "${unique_new_ips[@]}"; do
-        if [[ ! " ${current_blocked[*]} " =~ " ${ip} " ]]; then
+        if ! iptables -C "$CHAIN_NAME" -d "$ip" -j DROP 2>/dev/null; then
             to_block+=("$ip")
         fi
     done
